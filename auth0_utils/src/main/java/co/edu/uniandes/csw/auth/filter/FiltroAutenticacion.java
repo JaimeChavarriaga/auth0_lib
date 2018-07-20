@@ -35,7 +35,6 @@ public class FiltroAutenticacion implements Filter {
     private AuthenticationApi auth;
     private Properties prop;
     private InputStream input;
-    private static final String FILE = System.getenv("AUTH0_PROPERTIES");
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -44,14 +43,17 @@ public class FiltroAutenticacion implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        try {
+        
+    	// load the configuration from an "auth0.properties" file in the classpath
+    	try {
             this.auth = new AuthenticationApi();
         } catch (UnirestException | JSONException | InterruptedException | ExecutionException ex) {
             Logger.getLogger(FiltroAutenticacion.class.getName()).log(Level.SEVERE, null, ex);
         }
-        prop = new Properties();
-        input = new FileInputStream(FILE);
-        prop.load(input);
+        
+    	// obtain the list of the other properties in the "auth0.properties" file
+        prop = this.auth.getProp();
+        
         HttpResponse<String> rp = null;
         String usuario = null, jwt = null, path = null, resource = null, subject = null;
         Jws<Claims> claim = null;

@@ -18,8 +18,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -57,26 +55,21 @@ public class AuthenticationApi {
     }
 
     private Properties prop = new Properties();
-    private InputStream input = null;
     private static LoadingCache<String, UserDTO> profileCache;
-    private static final String PATH = System.getenv("AUTH0_PROPERTIES");
     private Process process;
     public static String tmp_path;
     public static String access_token;
 
     public AuthenticationApi() throws IOException, UnirestException, JSONException, InterruptedException, ExecutionException {
 
-        try {
-            input = new FileInputStream(PATH);
-            try {
-                prop.load(input);
-            } catch (IOException ex) {
-                Logger.getLogger(AuthenticationApi.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } catch (FileNotFoundException ex) {
+    	// load the configuration from an "auth0.properties" file in the classpath
+    	try {
+        	prop.load(AuthenticationApi.class.getClassLoader().getResourceAsStream("auth0.properties"));	
+        } catch (IOException ex) {
             Logger.getLogger(AuthenticationApi.class.getName()).log(Level.SEVERE, null, ex);
         }
-        profileCache = CacheBuilder.newBuilder()
+    	
+    	profileCache = CacheBuilder.newBuilder()
                 .maximumSize(10000) // maximum 100 records can be cached
                 .expireAfterAccess(30, TimeUnit.MINUTES) // cache will expire after 30 minutes of access
                 .build(new CacheLoader<String, UserDTO>() { // build the cacheloader
@@ -87,7 +80,7 @@ public class AuthenticationApi {
                     }
                 });
     }
-
+        
     public HttpResponse<String> managementToken() throws UnirestException {
         Unirest.setTimeouts(0, 0);
        
