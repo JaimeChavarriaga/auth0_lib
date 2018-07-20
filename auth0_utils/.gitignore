@@ -1,0 +1,8 @@
+# git ignore file for auth0-utils
+
+/target/
+
+# eclipse
+.classpath
+.project
+.settings/
